@@ -2,6 +2,8 @@ from pathlib import Path
 
 import scrapy
 
+from ..items import TutorialItem  
+
 class QuotesSpider(scrapy.Spider):
     name = "quotes"
 
@@ -15,6 +17,16 @@ class QuotesSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
+        # creating items dictionary 
+        items = TutorialItem()    
+        Quotes_all = response.xpath('//div/div/div/span[1]')
+ 
+        # These paths are based on the selectors
+         
+        for quote in Quotes_all:    #extracting data
+            items['Quote'] = quote.css('p::text').extract()
+            yield items
+
         author_page_links = response.css(".author + a")
         yield from response.follow_all(author_page_links, self.parse_author)
 
